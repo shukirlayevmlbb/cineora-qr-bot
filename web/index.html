@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="uz" data-theme="auto">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="theme-color" content="#f7f8fc">
+  <meta name="description" content="Cineora QR — premium Telegram QR studio">
+  <link rel="manifest" href="/assets/manifest.json">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+  <script type="module" src="/assets/app.js"></script>
+  <title>Cineora QR</title>
+</head>
+<body>
+  <div class="ambient ambient-a"></div><div class="ambient ambient-b"></div>
+  <div id="app" class="app-shell is-loading">
+    <header class="topbar">
+      <button class="brand" data-view="studio" aria-label="Cineora QR">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 44 44"><path d="M30.8 10.8A14 14 0 1 0 32 31"/><path d="M25 16h7v7M25 28h7v-3M16 16h5v5h-5zM16 25h5v5h-5z"/></svg>
+        </span>
+        <span><b>Cineora</b><small>QR Studio</small></span>
+      </button>
+      <div class="top-actions">
+        <button id="quick-theme" class="icon-btn" aria-label="Theme"><span class="sun-icon">◐</span></button>
+        <button id="profile-button" class="avatar" aria-label="Profile"><span id="avatar-letter">C</span></button>
+      </div>
+    </header>
+
+    <main>
+      <section id="view-studio" class="view active" data-page="studio">
+        <div class="hero">
+          <span class="eyebrow" data-i18n="eyebrow">SMART QR WORKSPACE</span>
+          <h1 data-i18n="heroTitle">Bir fikr. Bitta skan. Cheksiz imkoniyat.</h1>
+          <p data-i18n="heroText">Ma’lumotingizni tanlang, dizaynni moslang va tayyor QR kodni bir necha soniyada oling.</p>
+        </div>
+
+        <div class="section-head"><div><h2 data-i18n="chooseType">QR turini tanlang</h2><p data-i18n="chooseTypeHint">Eng ko‘p ishlatiladigan formatlar</p></div><button id="type-search-button" class="text-btn" data-i18n="search">Qidirish</button></div>
+        <div id="type-grid" class="type-grid"></div>
+
+        <div id="workspace" class="workspace hidden">
+          <div class="workspace-head">
+            <button id="close-workspace" class="back-btn" aria-label="Back">‹</button>
+            <div><span id="workspace-kicker" class="eyebrow"></span><h2 id="workspace-title"></h2></div>
+            <span id="autosave-status" class="status-pill" data-i18n="live">Live</span>
+          </div>
+          <div class="studio-layout">
+            <div class="form-column">
+              <form id="qr-form" class="glass-card form-card" novalidate>
+                <div id="dynamic-fields" class="fields"></div>
+              </form>
+              <section class="glass-card design-card">
+                <button class="card-toggle" data-toggle="design-panel"><span><small data-i18n="design">DESIGN</small><b data-i18n="customize">Ko‘rinishini sozlash</b></span><span>⌄</span></button>
+                <div id="design-panel" class="design-panel">
+                  <div class="control-group"><label data-i18n="presets">Tayyor uslublar</label><div id="preset-list" class="preset-list"></div></div>
+                  <div class="two-cols">
+                    <label class="color-field"><span data-i18n="foreground">Asosiy rang</span><input id="fg-color" type="color" value="#111318"><output>#111318</output></label>
+                    <label class="color-field"><span data-i18n="background">Fon</span><input id="bg-color" type="color" value="#FFFFFF"><output>#FFFFFF</output></label>
+                  </div>
+                  <label class="switch-row"><span><b data-i18n="gradient">Gradient</b><small data-i18n="gradientHint">Ikkinchi rang bilan yumshoq o‘tish</small></span><input id="gradient-toggle" type="checkbox"><i></i></label>
+                  <label id="gradient-color-wrap" class="color-field compact hidden"><span data-i18n="secondColor">Ikkinchi rang</span><input id="gradient-color" type="color" value="#635BFF"><output>#635BFF</output></label>
+                  <div class="control-group"><label data-i18n="moduleShape">Nuqtalar shakli</label><div id="shape-segment" class="segment"><button type="button" data-shape="square">■</button><button type="button" class="active" data-shape="rounded">▣</button><button type="button" data-shape="dots">●</button></div></div>
+                  <label class="switch-row"><span><b data-i18n="frame">Ramka va matn</b><small data-i18n="frameHint">QR ostiga chaqiruv yozuvi</small></span><input id="frame-toggle" type="checkbox"><i></i></label>
+                  <label id="frame-text-wrap" class="field hidden"><span data-i18n="frameText">Ramka matni</span><input id="frame-text" maxlength="32" value="SCAN ME"></label>
+                  <label class="upload-logo"><input id="logo-input" type="file" accept="image/png,image/jpeg,image/webp"><span class="upload-icon">＋</span><span><b data-i18n="addLogo">Logo qo‘shish</b><small data-i18n="logoHint">PNG, JPG yoki WebP · 1 MB gacha</small></span><button id="remove-logo" type="button" class="hidden" data-i18n="remove">O‘chirish</button></label>
+                </div>
+              </section>
+            </div>
+
+            <aside class="preview-column">
+              <div class="preview-card">
+                <div class="preview-top"><span data-i18n="preview">LIVE PREVIEW</span><span id="scan-score" class="quality good" data-i18n="highQuality">Yuqori aniqlik</span></div>
+                <div id="qr-preview" class="qr-preview"><div class="preview-placeholder"><span class="mini-mark">C</span><p data-i18n="fillFields">Maydonlarni to‘ldiring</p></div><img id="qr-image" alt="QR preview"></div>
+                <div class="preview-meta"><div><small data-i18n="format">FORMAT</small><b>PNG · SVG</b></div><div><small data-i18n="resolution">RESOLUTION</small><b id="resolution-label">768 × 768</b></div></div>
+              </div>
+              <div class="action-stack">
+                <button id="save-download" class="primary-btn" disabled><span data-i18n="savePng">Saqlash va PNG yuklash</span><i>↓</i></button>
+                <div class="split-actions"><button id="download-svg" class="secondary-btn" disabled><span>SVG</span></button><button id="share-qr" class="secondary-btn" disabled><span data-i18n="share">Ulashish</span></button></div>
+              </div>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section id="view-history" class="view" data-page="history">
+        <div class="page-title"><span class="eyebrow" data-i18n="library">YOUR LIBRARY</span><h1 data-i18n="history">QR tarixingiz</h1><p data-i18n="historyHint">Yaratilgan QR kodlarni qayta oching, nusxalang yoki sevimlilarga qo‘shing.</p></div>
+        <div class="history-toolbar"><div class="segment filter-segment"><button class="active" data-filter="all" data-i18n="all">Barchasi</button><button data-filter="favorite" data-i18n="favorites">Sevimlilar</button></div><button id="clear-history" class="danger-text" data-i18n="clear">Tozalash</button></div>
+        <div id="history-grid" class="history-grid"></div>
+        <div id="history-empty" class="empty-state hidden"><span class="empty-icon">⌁</span><h3 data-i18n="emptyHistory">Hali QR yaratilmagan</h3><p data-i18n="emptyHistoryHint">Birinchi QR kodingiz Studio bo‘limida paydo bo‘ladi.</p><button class="primary-btn compact-btn" data-view="studio" data-i18n="createQr">QR yaratish</button></div>
+      </section>
+
+      <section id="view-scan" class="view" data-page="scan">
+        <div class="page-title"><span class="eyebrow" data-i18n="scanner">SMART SCANNER</span><h1 data-i18n="scanTitle">QR kodni skanerlang</h1><p data-i18n="scanHint">Kamera yoki rasmdan QR ma’lumotini xavfsiz o‘qing.</p></div>
+        <div class="scanner-card glass-card">
+          <div id="camera-stage" class="camera-stage"><video id="scanner-video" playsinline muted></video><canvas id="scanner-canvas" hidden></canvas><div class="scan-frame"><i></i><i></i><i></i><i></i><span></span></div><div class="camera-placeholder"><span>⌗</span><p data-i18n="cameraReady">Kamera ishga tushirishga tayyor</p></div></div>
+          <div class="scanner-actions"><button id="start-camera" class="primary-btn" data-i18n="openCamera">Kamerani ochish</button><label class="secondary-btn file-button"><input id="scan-file" type="file" accept="image/*"><span data-i18n="chooseImage">Rasm tanlash</span></label></div>
+          <div id="scan-result" class="scan-result hidden"><small data-i18n="scanResult">NATIJA</small><p id="scan-result-text"></p><div><button id="copy-scan" class="secondary-btn" data-i18n="copy">Nusxalash</button><a id="open-scan" class="primary-btn compact-btn" target="_blank" rel="noopener" data-i18n="open">Ochish</a></div></div>
+        </div>
+      </section>
+
+      <section id="view-settings" class="view" data-page="settings">
+        <div class="page-title"><span class="eyebrow" data-i18n="preferences">PREFERENCES</span><h1 data-i18n="settings">Sozlamalar</h1><p data-i18n="settingsHint">Cineora QR tajribasini o‘zingizga moslang.</p></div>
+        <div class="settings-layout">
+          <div class="profile-card glass-card"><div class="profile-avatar"><span id="settings-avatar">C</span></div><div><h3 id="profile-name">Cineora user</h3><p id="profile-username">Telegram</p></div><span class="verified">✓</span></div>
+          <div class="settings-card glass-card">
+            <div class="setting-row"><span><b data-i18n="language">Til</b><small data-i18n="languageHint">Interfeys tili</small></span><select id="language-select"><option value="uz">O‘zbekcha</option><option value="ru">Русский</option><option value="en">English</option></select></div>
+            <div class="setting-row"><span><b data-i18n="appearance">Ko‘rinish</b><small data-i18n="appearanceHint">Telegram mavzusiga mos</small></span><select id="theme-select"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></div>
+            <label class="setting-row switch-row"><span><b data-i18n="saveHistory">Tarixni saqlash</b><small data-i18n="saveHistoryHint">Yangi QRlar kutubxonaga qo‘shiladi</small></span><input id="history-setting" type="checkbox" checked><i></i></label>
+            <label class="setting-row switch-row"><span><b data-i18n="saveWifi">Wi‑Fi tarixini saqlash</b><small data-i18n="saveWifiHint">Parol bazada shifrlanmagan holda saqlanadi</small></span><input id="wifi-setting" type="checkbox"><i></i></label>
+          </div>
+          <div class="storage-card glass-card"><div class="storage-icon">⌘</div><div><b data-i18n="secureStorage">Xavfsiz bulutli saqlash</b><p id="storage-status" data-i18n="postgresReady">PostgreSQL bilan sinxronlanmoqda</p></div><span class="status-dot"></span></div>
+          <button id="about-button" class="about-row"><span><b data-i18n="about">Cineora QR haqida</b><small>Version 2.0 · Mini App</small></span><i>›</i></button>
+        </div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="Main navigation">
+      <button class="active" data-view="studio"><span>⌘</span><small data-i18n="studio">Studio</small></button>
+      <button data-view="history"><span>◷</span><small data-i18n="historyNav">Tarix</small></button>
+      <button data-view="scan"><span>⌗</span><small data-i18n="scanNav">Skaner</small></button>
+      <button data-view="settings"><span>◉</span><small data-i18n="settingsNav">Sozlama</small></button>
+    </nav>
+
+    <div id="loading-screen" class="loading-screen"><span class="brand-mark large"><svg viewBox="0 0 44 44"><path d="M30.8 10.8A14 14 0 1 0 32 31"/><path d="M25 16h7v7M25 28h7v-3M16 16h5v5h-5zM16 25h5v5h-5z"/></svg></span><p>Cineora QR</p><i></i></div>
+    <div id="telegram-gate" class="modal-backdrop hidden"><div class="modal"><span class="brand-mark large"><svg viewBox="0 0 44 44"><path d="M30.8 10.8A14 14 0 1 0 32 31"/><path d="M25 16h7v7M25 28h7v-3M16 16h5v5h-5zM16 25h5v5h-5z"/></svg></span><h2 data-i18n="openTelegram">Telegram ichida oching</h2><p data-i18n="openTelegramHint">Tarix va xavfsiz Telegram avtorizatsiyasi uchun Mini App’ni bot orqali ishga tushiring.</p><button id="close-app" class="primary-btn" data-i18n="close">Yopish</button></div></div>
+    <div id="confirm-modal" class="modal-backdrop hidden"><div class="modal"><h2 id="confirm-title"></h2><p id="confirm-text"></p><div class="modal-actions"><button id="confirm-cancel" class="secondary-btn" data-i18n="cancel">Bekor qilish</button><button id="confirm-yes" class="danger-btn" data-i18n="confirm">Tasdiqlash</button></div></div></div>
+    <div id="toast" class="toast"><span>✓</span><p></p></div>
+  </div>
+</body>
+</html>
