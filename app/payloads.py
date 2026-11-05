@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 from urllib.parse import quote, urlencode
 
 from . import validators
-
 
 Validator = Callable[[str], Any]
 

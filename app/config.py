@@ -25,11 +25,14 @@ def load_dotenv(path: str | Path = ".env") -> None:
 class Config:
     bot_token: str
     database_path: Path
+    database_url: str
     admin_ids: frozenset[int]
     log_level: str
+    webapp_url: str
+    webapp_preview: bool
 
     @classmethod
-    def from_env(cls) -> "Config":
+    def from_env(cls) -> Config:
         load_dotenv()
         token = os.getenv("BOT_TOKEN", "").strip()
         if not token:
@@ -51,6 +54,9 @@ class Config:
         return cls(
             bot_token=token,
             database_path=database_path,
+            database_url=os.getenv("DATABASE_URL", "").strip(),
             admin_ids=frozenset(admins),
             log_level=os.getenv("LOG_LEVEL", "INFO").upper(),
+            webapp_url=os.getenv("WEBAPP_URL", "").strip().rstrip("/"),
+            webapp_preview=os.getenv("WEBAPP_PREVIEW", "false").strip().lower() in {"1", "true", "yes"},
         )

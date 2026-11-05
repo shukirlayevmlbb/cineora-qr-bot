@@ -8,13 +8,14 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 from aiohttp import web
 
 from .config import Config
 from .db import Database
 from .handlers import router
 from .middleware import ThrottlingMiddleware
+from .webapp import create_web_application
 
 
 async def cleanup_loop(db: Database) -> None:
@@ -30,18 +31,13 @@ async def cleanup_loop(db: Database) -> None:
             logging.getLogger(__name__).exception("Temporary record cleanup failed")
 
 
-async def start_health_server() -> web.AppRunner | None:
-    """Expose a tiny HTTP endpoint so Render Web Service can verify the process."""
+async def start_health_server(db: Database, config: Config) -> web.AppRunner | None:
+    """Serve the Telegram Mini App, its API, and Render health checks."""
     raw_port = os.getenv("PORT", "").strip()
     if not raw_port:
         return None
 
-    async def health(_: web.Request) -> web.Response:
-        return web.json_response({"status": "ok", "service": "qr-studio-bot"})
-
-    app = web.Application()
-    app.router.add_get("/", health)
-    app.router.add_get("/health", health)
+    app = create_web_application(db, config)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, "0.0.0.0", int(raw_port))
@@ -57,11 +53,16 @@ async def main() -> None:
         format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
     )
 
-    db = Database(config.database_path)
+    db = Database(config.database_path, config.database_url)
     await db.initialize()
     await db.cleanup_temporary()
 
     bot = Bot(config.bot_token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    webapp_url = config.webapp_url or os.getenv("RENDER_EXTERNAL_URL", "").rstrip("/")
+    if webapp_url:
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(text="Cineora QR", web_app=WebAppInfo(url=webapp_url))
+        )
     dispatcher = Dispatcher(storage=MemoryStorage())
     dispatcher.message.middleware(ThrottlingMiddleware())
     dispatcher.include_router(router)
@@ -72,7 +73,7 @@ async def main() -> None:
         BotCommand(command="cancel", description="Joriy amalni bekor qilish"),
     ])
 
-    health_runner = await start_health_server()
+    health_runner = await start_health_server(db, config)
     cleanup_task = asyncio.create_task(cleanup_loop(db))
     try:
         await dispatcher.start_polling(
@@ -86,6 +87,7 @@ async def main() -> None:
         await asyncio.gather(cleanup_task, return_exceptions=True)
         if health_runner is not None:
             await health_runner.cleanup()
+        await db.close()
         await bot.session.close()
 
 

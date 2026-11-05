@@ -1,19 +1,27 @@
 from __future__ import annotations
 
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    KeyboardButton,
+    ReplyKeyboardMarkup,
+    WebAppInfo,
+)
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from .db import QRRecord, UserSettings
 from .texts import STYLE_LABELS, TYPE_LABELS
 
 
-def main_menu() -> InlineKeyboardMarkup:
+def main_menu(webapp_url: str = "") -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
+    if webapp_url:
+        builder.row(InlineKeyboardButton(text="Cineora QR Mini App", web_app=WebAppInfo(url=webapp_url)))
     builder.button(text="＋ QR yaratish", callback_data="menu:create")
     builder.button(text="🕘 Mening QRlarim", callback_data="menu:history:0")
     builder.button(text="⚙️ Sozlamalar", callback_data="menu:settings")
     builder.button(text="ℹ️ Yordam", callback_data="menu:help")
-    builder.adjust(1, 2, 1)
+    builder.adjust(1, 1, 2, 1)
     return builder.as_markup()
 
 

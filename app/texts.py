@@ -1,8 +1,8 @@
-WELCOME = """<b>QR Studio</b>
+WELCOME = """<b>Cineora QR</b>
 
-Telefon, sayt, Wi‑Fi, kontakt va boshqa ma’lumotlar uchun QR kod yarating.
+Apple va Stripe uslubidagi yangi Mini App orqali QR kod yarating, bezang va saqlang.
 
-Kerakli bo‘limni tanlang — bot sizdan faqat zarur ma’lumotlarni so‘raydi."""
+Pastdagi Mini App tugmasini bosing. Eski bot menyusi ham zaxira sifatida ishlashda davom etadi."""
 
 HELP = """<b>Yordam</b>
 

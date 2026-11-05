@@ -40,7 +40,6 @@ from .states import CreateQR
 from .texts import CANCELLED, HELP, STYLE_LABELS, TYPE_LABELS, WELCOME
 from .validators import ValidationError
 
-
 router = Router(name="main")
 logger = logging.getLogger(__name__)
 
@@ -67,11 +66,11 @@ async def safe_edit(callback: CallbackQuery, text: str, reply_markup=None) -> No
 
 
 @router.message(CommandStart())
-async def start(message: Message, state: FSMContext, db: Database) -> None:
+async def start(message: Message, state: FSMContext, db: Database, config: Config) -> None:
     await state.clear()
     assert message.from_user is not None
     await db.ensure_user(message.from_user.id)
-    await message.answer(WELCOME, reply_markup=main_menu())
+    await message.answer(WELCOME, reply_markup=main_menu(config.webapp_url))
 
 
 @router.message(Command("help"))
