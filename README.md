@@ -1,58 +1,19 @@
-# QR Studio Telegram Bot
+# Cineora QR
 
-Aiogram 3 asosidagi, o‘zbek tilida ishlaydigan to‘liq QR kod generator bot. Menyular ataylab qisqa saqlangan: foydalanuvchi QR turini tanlaydi va faqat o‘sha tur uchun zarur savollarga javob beradi.
+Cineora QR — Telegram ichida ishlaydigan to‘liq QR Studio Mini App. Aiogram 3 bot, aiohttp API va responsiv Web App bitta servisda ishlaydi.
 
 ## Imkoniyatlar
 
-- 11 tur: sayt, Wi‑Fi, telefon, matn, Telegram, email, SMS, WhatsApp, vCard kontakt, lokatsiya va taqvim tadbiri.
-- Har bir maydon uchun tekshiruv va tushunarli xato xabari.
-- 5 xil yuqori kontrastli dizayn; tayyor QR rangini bir bosishda almashtirish.
-- PNG rasm va sifat yo‘qotmaydigan SVG fayl.
-- SQLite tarix, sahifalash, qayta ochish, bittalab yoki to‘liq o‘chirish.
-- Tarixni o‘chirish va Wi‑Fi parolini tarixga saqlamaslik uchun maxfiylik sozlamalari.
-- Telegram lokatsiyasini to‘g‘ridan-to‘g‘ri qabul qilish.
-- Flood himoyasi, foydalanuvchiga xavfsiz xato xabari va loglar.
-- Admin uchun `/stats`.
-- Docker, Docker Compose va oddiy Python orqali ishga tushirish.
-- Asosiy validator va QR payloadlari uchun avtomatik testlar.
+- 11+ QR turi: sayt, Wi‑Fi, telefon, matn, Telegram, email, SMS, WhatsApp, vCard kontakt, lokatsiya va taqvim tadbiri.
+- Apple + Stripe uslubidagi light/dark interfeys, o‘zbek, rus va ingliz tillari.
+- Jonli preview, rang va gradient, square/rounded/dots shakllari, ramka yozuvi va logotip.
+- PNG va sifat yo‘qotmaydigan SVG yuklab olish, tizim Share oynasi orqali ulashish.
+- QR skaner: `BarcodeDetector`, ishlamasa `jsQR` zaxira mexanizmi.
+- PostgreSQL yoki SQLite tarix, sevimlilar, qayta tahrirlash va maxfiylik sozlamalari.
+- Telegram `initData` imzosini serverda tekshirish, xavfsizlik sarlavhalari va flood himoyasi.
+- Admin uchun `/stats`, Docker va Render qo‘llovi.
 
-## 1. Bot tokenini olish
-
-1. Telegram’da [@BotFather](https://t.me/BotFather) ni oching.
-2. `/newbot` yuboring va bot nomi hamda username tanlang.
-3. Berilgan tokenni nusxalang.
-4. BotFather’da `/setdescription`, `/setabouttext` va `/setuserpic` orqali profilni to‘ldiring.
-
-Tavsiya etiladigan description:
-
-> Sayt, Wi‑Fi, telefon, kontakt va boshqa ma’lumotlar uchun tez va sifatli QR kod yarating.
-
-## 2. Eng oson ishga tushirish — Docker
-
-Serverda Docker va Docker Compose o‘rnatilgan bo‘lishi kerak.
-
-```bash
-cp .env.example .env
-nano .env
-docker compose up -d --build
-docker compose logs -f
-```
-
-`.env` ichidagi `BOT_TOKEN` ni haqiqiy token bilan almashtiring. Ma’lumotlar `data/qrbot.sqlite3` faylida saqlanadi va konteyner yangilanganda yo‘qolmaydi.
-
-To‘xtatish:
-
-```bash
-docker compose down
-```
-
-Yangilangan kodni ishga tushirish:
-
-```bash
-docker compose up -d --build
-```
-
-## 3. Oddiy Python orqali ishga tushirish
+## Lokal ishga tushirish
 
 Python 3.11 yoki 3.12 tavsiya qilinadi.
 
@@ -61,80 +22,77 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env
-nano .env
 python main.py
 ```
 
-## Render Free Web Service
+Mini Appni Telegram tashqarisida lokal tekshirish uchun `.env` ichida `WEBAPP_PREVIEW=true` qiling. Productionda bu qiymat albatta `false` bo‘lishi kerak.
 
-Repository’ni Render’ga ulang va quyidagilarni tanlang:
+## Render deploy
 
-- Service type: **Web Service**
-- Runtime: **Python 3**
-- Build command: `pip install -r requirements.txt`
-- Start command: `python main.py`
-- Health check path: `/health`
+Repository’ni Render Web Service’ga ulang:
 
-Environment bo‘limida `BOT_TOKEN` va `ADMIN_IDS` qiymatlarini kiriting. Render avtomatik bergan `PORT` o‘zgaruvchisi orqali bot kichik health server ochadi; Telegram botning o‘zi polling rejimida ishlashda davom etadi.
+| Parametr | Qiymat |
+|---|---|
+| Runtime | Docker |
+| Start command | Dockerfile ichida (`python main.py`) |
+| Health check | `/health` |
+| Web App URL | `https://<service>.onrender.com` |
 
-Render Free fayl tizimi vaqtinchalik. Shu sabab bepul servis qayta ishga tushsa yoki deploy qilinsa, SQLite tarix yo‘qolishi mumkin. Doimiy tarix uchun pullik persistent disk yoki PostgreSQL kerak bo‘ladi.
-
-Windows’da virtual muhitni faollashtirish:
-
-```powershell
-.venv\Scripts\activate
-```
-
-## Sozlamalar
+Environment qiymatlari:
 
 | O‘zgaruvchi | Vazifasi | Standart |
 |---|---|---|
 | `BOT_TOKEN` | BotFather tokeni | Majburiy |
 | `ADMIN_IDS` | `/stats` uchun Telegram IDlar | Bo‘sh |
+| `DATABASE_URL` | PostgreSQL connection URL | Bo‘sh bo‘lsa SQLite |
 | `DATABASE_PATH` | SQLite fayl manzili | `data/qrbot.sqlite3` |
+| `WEBAPP_URL` | Mini Appning HTTPS manzili | Render URL’dan olinadi |
+| `WEBAPP_PREVIEW` | Telegram tashqarisidagi test rejimi | `false` |
 | `LOG_LEVEL` | Log darajasi | `INFO` |
 
-Telegram ID’ingizni [@userinfobot](https://t.me/userinfobot) orqali bilishingiz mumkin. Bir nechta admin ID vergul bilan yoziladi.
+Render Free fayl tizimi vaqtinchalik, shuning uchun production tarix uchun tashqi PostgreSQL ishlating. `DATABASE_URL` odatda `postgresql://...` yoki `postgres://...` formatida bo‘ladi.
 
-## Test va tekshiruv
+Bot ishga tushganda Telegram menyu tugmasini avtomatik ravishda Mini Appga bog‘laydi. `WEBAPP_URL` bo‘lmasa, Render bergan `RENDER_EXTERNAL_URL` ishlatiladi.
 
-Standart kutubxona bilan testlar:
+## Docker
 
 ```bash
-python -m unittest discover -s tests -v
+docker compose up -d --build
+docker compose logs -f
 ```
 
-Development paketlari o‘rnatilgan bo‘lsa:
+## Test
 
 ```bash
 pip install -r requirements-dev.txt
-ruff check .
+python -m unittest discover -s tests -v
 pytest
+ruff check .
+node --check web/app.js
 ```
 
 ## Tuzilma
 
 ```text
 app/
-  bot.py          # ishga tushirish va Telegram buyruqlari
-  handlers.py     # menyular, wizard va callbacklar
-  payloads.py     # QR turlari va standart formatlar
-  validators.py   # foydalanuvchi ma’lumotlarini tekshirish
-  qr_builder.py   # PNG/SVG generator
-  db.py           # SQLite qatlam
-  keyboards.py    # inline/reply menyular
-  config.py       # .env konfiguratsiya
-tests/             # avtomatik testlar
+  bot.py          # bot va Web App server lifecycle
+  webapp.py       # Mini App API, Telegram auth va statik fayllar
+  db.py           # PostgreSQL/SQLite ma’lumotlar qatlami
+  qr_builder.py   # maxsus PNG/SVG generator
+  handlers.py     # Telegram bot menyulari
+  payloads.py     # QR formatlari
+  validators.py   # kiruvchi ma’lumot tekshiruvi
+web/
+  index.html      # Mini App interfeysi
+  styles.css      # light/dark responsiv dizayn
+  app.js          # QR Studio, tarix, skaner va lokalizatsiya
+tests/            # 21 avtomatik test
 ```
 
-## Maxfiylik
+## Xavfsizlik
 
-- Wi‑Fi QR kodi standart holatda tarixga saqlanmaydi.
-- Foydalanuvchi barcha tarixni sozlamalardan o‘chirishi mumkin.
-- Tarix o‘chiq QRlar faqat tugmalar ishlashi uchun vaqtincha saqlanadi va bot qayta ishga tushganda 24 soatdan eskilari tozalanadi.
-- `.env` va SQLite bazasi Git’ga kiritilmaydi.
-- Production serverda `data/` papkasiga faqat bot foydalanuvchisi kira olishini ta’minlang va muntazam zaxira nusxa oling.
-
-## Muhim eslatma
-
-Bot polling rejimida ishlaydi, shuning uchun domen yoki SSL sertifikat talab qilinmaydi. Tokenni hech qachon GitHub’ga yoki begona odamga yubormang. Token tarqalib ketsa, BotFather’dagi `/revoke` orqali darhol yangilang.
+- `.env`, token va baza connection URL’ini GitHub’ga yuklamang.
+- Productionda `WEBAPP_PREVIEW=false` bo‘lsin.
+- Wi‑Fi ma’lumotlarini tarixga saqlash foydalanuvchi sozlamasiga bog‘liq.
+- Foydalanuvchi tarixini o‘chirishi mumkin.
+- Token tarqalib ketsa, BotFather’dagi `/revoke` orqali yangilang.
